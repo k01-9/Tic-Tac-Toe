@@ -10,22 +10,29 @@ const statusText = document.getElementById("status");
 
 // Create board
 function createBoard() {
+    const focusedSquare = document.activeElement?.dataset.square;
     boardDiv.innerHTML = "";
 
     const suggestion = gameOver || aiTimer !== null ? -1 : findBestMove(HUMAN);
 
     board.forEach((cell, index) => {
-        const div = document.createElement("div");
+        const div = document.createElement("button");
         div.classList.add("cell");
+        div.type = "button";
+        div.dataset.square = index;
         div.innerText = cell;
+        div.setAttribute("aria-disabled", String(cell !== "" || gameOver || aiTimer !== null));
+        const label = `Row ${Math.floor(index / 3) + 1}, column ${index % 3 + 1}: ${cell || "empty"}`;
 
         // Highlight suggested move
         if (index === suggestion && cell === "" && !gameOver) {
             div.classList.add("suggested");
         }
 
+        div.setAttribute("aria-label", index === suggestion ? `${label}, suggested move` : label);
         div.onclick = () => playerMove(index);
         boardDiv.appendChild(div);
+        if (div.dataset.square === focusedSquare) div.focus();
     });
 }
 
@@ -146,7 +153,7 @@ function playerMove(index) {
             return;
         }
 
-        statusText.innerText = "";
+        statusText.innerText = "Your turn (X)";
         createBoard();
     }, 1000);
     createBoard();
@@ -160,9 +167,9 @@ function resetGame() {
     }
     board = ["", "", "", "", "", "", "", "", ""];
     gameOver = false;
-    statusText.innerText = "";
+    statusText.innerText = "Your turn (X)";
     createBoard();
 }
 
 // Init
-createBoard();
+resetGame();

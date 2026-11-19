@@ -11,15 +11,17 @@ h1 {
 
 #board {
     display: grid;
-    grid-template-columns: repeat(3, 100px);
+    grid-template-columns: repeat(3, minmax(0, 100px));
     gap: 10px;
     justify-content: center;
     margin: 20px;
 }
 
 .cell {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0;
+    color: inherit;
     font-size: 2rem;
     background: #1e293b;
     border: 2px solid #38bdf8;
@@ -29,7 +31,16 @@ h1 {
     justify-content: center;
 }
 
-.cell:hover {
+.cell[aria-disabled="true"] {
+    cursor: default;
+}
+
+.cell:focus-visible {
+    outline: 3px solid white;
+    outline-offset: 2px;
+}
+
+.cell[aria-disabled="false"]:hover {
     background: #334155;
 }
 
@@ -43,7 +54,7 @@ button {
 
 .suggested {
     background: #22c55e !important;
-    color: black;
+    color: black !important;
 }
 
 #status {
