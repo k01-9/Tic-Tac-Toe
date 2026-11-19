@@ -3,6 +3,7 @@ const AI = "O";
 
 let board = ["", "", "", "", "", "", "", "", ""];
 let gameOver = false;
+let aiTimer = null;
 
 const boardDiv = document.getElementById("board");
 const statusText = document.getElementById("status");
@@ -11,7 +12,7 @@ const statusText = document.getElementById("status");
 function createBoard() {
     boardDiv.innerHTML = "";
 
-    let suggestion = findBestMove(HUMAN);
+    const suggestion = gameOver || aiTimer !== null ? -1 : findBestMove(HUMAN);
 
     board.forEach((cell, index) => {
         const div = document.createElement("div");
@@ -105,7 +106,7 @@ function findBestMove(player) {
 
 // Player move
 function playerMove(index) {
-    if (board[index] !== "" || gameOver) return;
+    if (board[index] !== "" || gameOver || aiTimer !== null) return;
 
     board[index] = HUMAN;
 
@@ -123,12 +124,12 @@ function playerMove(index) {
         return;
     }
 
-    createBoard();
     statusText.innerText = "🤖 AI is thinking...";
 
     // ⏳ Delay AI move
-    setTimeout(() => {
-        let aiMove = findBestMove(AI);
+    aiTimer = setTimeout(() => {
+        aiTimer = null;
+        const aiMove = findBestMove(AI);
         board[aiMove] = AI;
 
         if (checkWinner(AI)) {
@@ -147,11 +148,16 @@ function playerMove(index) {
 
         statusText.innerText = "";
         createBoard();
-    }, 1000); // change delay here (1000ms = 1 sec)
+    }, 1000);
+    createBoard();
 }
 
 // Restart
 function resetGame() {
+    if (aiTimer !== null) {
+        clearTimeout(aiTimer);
+        aiTimer = null;
+    }
     board = ["", "", "", "", "", "", "", "", ""];
     gameOver = false;
     statusText.innerText = "";
