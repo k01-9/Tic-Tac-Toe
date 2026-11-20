@@ -8,31 +8,26 @@ let aiTimer = null;
 const boardDiv = document.getElementById("board");
 const statusText = document.getElementById("status");
 
-// Create board
-function createBoard() {
-    const focusedSquare = document.activeElement?.dataset.square;
-    boardDiv.innerHTML = "";
+const squares = board.map((_, index) => {
+    const square = document.createElement("button");
+    square.className = "cell";
+    square.type = "button";
+    square.onclick = () => playerMove(index);
+    boardDiv.appendChild(square);
+    return square;
+});
 
+function renderBoard() {
     const suggestion = gameOver || aiTimer !== null ? -1 : findBestMove(HUMAN);
 
-    board.forEach((cell, index) => {
-        const div = document.createElement("button");
-        div.classList.add("cell");
-        div.type = "button";
-        div.dataset.square = index;
-        div.innerText = cell;
-        div.setAttribute("aria-disabled", String(cell !== "" || gameOver || aiTimer !== null));
+    squares.forEach((square, index) => {
+        const cell = board[index];
+        const suggested = index === suggestion;
         const label = `Row ${Math.floor(index / 3) + 1}, column ${index % 3 + 1}: ${cell || "empty"}`;
-
-        // Highlight suggested move
-        if (index === suggestion && cell === "" && !gameOver) {
-            div.classList.add("suggested");
-        }
-
-        div.setAttribute("aria-label", index === suggestion ? `${label}, suggested move` : label);
-        div.onclick = () => playerMove(index);
-        boardDiv.appendChild(div);
-        if (div.dataset.square === focusedSquare) div.focus();
+        square.textContent = cell;
+        square.classList.toggle("suggested", suggested);
+        square.setAttribute("aria-disabled", String(cell !== "" || gameOver || aiTimer !== null));
+        square.setAttribute("aria-label", suggested ? `${label}, suggested move` : label);
     });
 }
 
@@ -119,14 +114,14 @@ function playerMove(index) {
 
     if (checkWinner(HUMAN)) {
         gameOver = true;
-        createBoard();
+        renderBoard();
         statusText.innerText = "🎉 You Win!";
         return;
     }
 
     if (isFull()) {
         gameOver = true;
-        createBoard();
+        renderBoard();
         statusText.innerText = "Draw!";
         return;
     }
@@ -141,22 +136,22 @@ function playerMove(index) {
 
         if (checkWinner(AI)) {
             gameOver = true;
-            createBoard();
+            renderBoard();
             statusText.innerText = "😢 AI Wins!";
             return;
         }
 
         if (isFull()) {
             gameOver = true;
-            createBoard();
+            renderBoard();
             statusText.innerText = "Draw!";
             return;
         }
 
         statusText.innerText = "Your turn (X)";
-        createBoard();
+        renderBoard();
     }, 1000);
-    createBoard();
+    renderBoard();
 }
 
 // Restart
@@ -168,7 +163,7 @@ function resetGame() {
     board = ["", "", "", "", "", "", "", "", ""];
     gameOver = false;
     statusText.innerText = "Your turn (X)";
-    createBoard();
+    renderBoard();
 }
 
 // Init
