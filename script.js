@@ -7,6 +7,8 @@ let aiTimer = null;
 
 const boardDiv = document.getElementById("board");
 const statusText = document.getElementById("status");
+const hints = document.getElementById("hints");
+hints.addEventListener("change", renderBoard);
 
 const squares = board.map((_, index) => {
     const square = document.createElement("button");
@@ -18,7 +20,7 @@ const squares = board.map((_, index) => {
 });
 
 function renderBoard() {
-    const suggestion = gameOver || aiTimer !== null ? -1 : findBestMove(HUMAN);
+    const suggestion = !hints.checked || gameOver || aiTimer !== null ? -1 : findBestMove(HUMAN);
 
     squares.forEach((square, index) => {
         const cell = board[index];
