@@ -3,6 +3,7 @@ const AI = "O";
 
 let board = ["", "", "", "", "", "", "", "", ""];
 let gameOver = false;
+let winningSquares = [];
 let aiTimer = null;
 
 const boardDiv = document.getElementById("board");
@@ -28,21 +29,21 @@ function renderBoard() {
         const label = `Row ${Math.floor(index / 3) + 1}, column ${index % 3 + 1}: ${cell || "empty"}`;
         square.textContent = cell;
         square.classList.toggle("suggested", suggested);
+        square.classList.toggle("winning", winningSquares.includes(index));
         square.setAttribute("aria-disabled", String(cell !== "" || gameOver || aiTimer !== null));
-        square.setAttribute("aria-label", suggested ? `${label}, suggested move` : label);
+        const annotation = suggested ? ", suggested move" : winningSquares.includes(index) ? ", winning square" : "";
+        square.setAttribute("aria-label", label + annotation);
     });
 }
 
-// Check winner
-function checkWinner(player) {
-    const winPatterns = [
-        [0,1,2],[3,4,5],[6,7,8],
-        [0,3,6],[1,4,7],[2,5,8],
-        [0,4,8],[2,4,6]
-    ];
-    return winPatterns.some(pattern =>
-        pattern.every(i => board[i] === player)
-    );
+const winPatterns = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+];
+
+function findWinningSquares(player) {
+    return winPatterns.find(pattern => pattern.every(index => board[index] === player));
 }
 
 // Check draw
@@ -52,8 +53,8 @@ function isFull() {
 
 // Minimax
 function minimax(isMax) {
-    if (checkWinner(AI)) return 10;
-    if (checkWinner(HUMAN)) return -10;
+    if (findWinningSquares(AI)) return 10;
+    if (findWinningSquares(HUMAN)) return -10;
     if (isFull()) return 0;
 
     if (isMax) {
@@ -114,7 +115,9 @@ function playerMove(index) {
 
     board[index] = HUMAN;
 
-    if (checkWinner(HUMAN)) {
+    const humanWin = findWinningSquares(HUMAN);
+    if (humanWin) {
+        winningSquares = humanWin;
         gameOver = true;
         renderBoard();
         statusText.innerText = "🎉 You Win!";
@@ -136,7 +139,9 @@ function playerMove(index) {
         const aiMove = findBestMove(AI);
         board[aiMove] = AI;
 
-        if (checkWinner(AI)) {
+        const aiWin = findWinningSquares(AI);
+        if (aiWin) {
+            winningSquares = aiWin;
             gameOver = true;
             renderBoard();
             statusText.innerText = "😢 AI Wins!";
@@ -164,6 +169,7 @@ function resetGame() {
     }
     board = ["", "", "", "", "", "", "", "", ""];
     gameOver = false;
+    winningSquares = [];
     statusText.innerText = "Your turn (X)";
     renderBoard();
 }
