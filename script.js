@@ -5,9 +5,11 @@ let board = ["", "", "", "", "", "", "", "", ""];
 let gameOver = false;
 let winningSquares = [];
 let aiTimer = null;
+const score = { human: 0, computer: 0, draws: 0 };
 
 const boardDiv = document.getElementById("board");
 const statusText = document.getElementById("status");
+const scoreText = document.getElementById("score");
 const hints = document.getElementById("hints");
 hints.addEventListener("change", renderBoard);
 
@@ -129,6 +131,15 @@ function findBestMove(player) {
     return move;
 }
 
+function finishRound(result, message, winningLine = []) {
+    gameOver = true;
+    winningSquares = winningLine;
+    score[result]++;
+    scoreText.textContent = `You: ${score.human} · Computer: ${score.computer} · Draws: ${score.draws}`;
+    statusText.innerText = message;
+    renderBoard();
+}
+
 // Player move
 function playerMove(index) {
     if (board[index] !== "" || gameOver || aiTimer !== null) return;
@@ -137,17 +148,12 @@ function playerMove(index) {
 
     const humanWin = findWinningSquares(HUMAN);
     if (humanWin) {
-        winningSquares = humanWin;
-        gameOver = true;
-        renderBoard();
-        statusText.innerText = "🎉 You Win!";
+        finishRound("human", "🎉 You Win!", humanWin);
         return;
     }
 
     if (isFull()) {
-        gameOver = true;
-        renderBoard();
-        statusText.innerText = "Draw!";
+        finishRound("draws", "Draw!");
         return;
     }
 
@@ -161,17 +167,12 @@ function playerMove(index) {
 
         const aiWin = findWinningSquares(AI);
         if (aiWin) {
-            winningSquares = aiWin;
-            gameOver = true;
-            renderBoard();
-            statusText.innerText = "😢 AI Wins!";
+            finishRound("computer", "😢 AI Wins!", aiWin);
             return;
         }
 
         if (isFull()) {
-            gameOver = true;
-            renderBoard();
-            statusText.innerText = "Draw!";
+            finishRound("draws", "Draw!");
             return;
         }
 

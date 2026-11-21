@@ -16,7 +16,7 @@ function loadGame() {
             this[type] = listener;
         }
     };
-    const elements = { board: { appendChild: square => squares.push(square), addEventListener() {} }, status, hints };
+    const elements = { board: { appendChild: square => squares.push(square), addEventListener() {} }, status, hints, score: {} };
     const context = vm.createContext({
         document: {
             getElementById: id => elements[id],
