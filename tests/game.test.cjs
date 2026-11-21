@@ -16,7 +16,14 @@ function loadGame() {
             this[type] = listener;
         }
     };
-    const elements = { board: { appendChild: square => squares.push(square), addEventListener() {} }, status, hints, score: {} };
+    const board = {
+        appendChild: square => squares.push(square),
+        addEventListener(type, listener) {
+            this[type] = listener;
+        }
+    };
+    const score = {};
+    const elements = { board, status, hints, score };
     const context = vm.createContext({
         document: {
             getElementById: id => elements[id],
@@ -24,6 +31,7 @@ function loadGame() {
                 const classes = new Set();
                 const attributes = new Map();
                 return {
+                    focus() { board.focused = this; },
                     classes,
                     attributes,
                     classList: { toggle: (name, active) => active ? classes.add(name) : classes.delete(name) },
@@ -39,7 +47,7 @@ function loadGame() {
         clearTimeout: timer => timers.delete(timer)
     });
     vm.runInContext(source, context);
-    return { squares, status, hints, timers, run: code => vm.runInContext(code, context) };
+    return { board, squares, status, hints, score, timers, run: code => vm.runInContext(code, context) };
 }
 
 test("a pending AI turn locks the board and restart cancels the move", () => {
@@ -78,4 +86,31 @@ test("hints can be disabled and winning squares are labeled until restart", () =
     run("resetGame()");
     assert.ok(squares.every(square => !square.classes.has("winning")));
     assert.ok(squares.every(square => !square.classes.has("suggested")));
+});
+
+test("arrow keys stay within the board and leave other keys alone", () => {
+    const { board, squares } = loadGame();
+    function press(key, target) {
+        let prevented = false;
+        board.keydown({ key, target, preventDefault() { prevented = true; } });
+        return prevented;
+    }
+
+    assert.equal(press("ArrowRight", squares[0]), true);
+    assert.equal(board.focused, squares[1]);
+    assert.equal(press("ArrowLeft", squares[0]), true);
+    assert.equal(board.focused, squares[1]);
+    assert.equal(press("Tab", squares[1]), false);
+});
+
+test("a completed round is counted once and survives restart", () => {
+    const { score, squares, run } = loadGame();
+    run('board = ["X", "X", "", "O", "O", "", "", "", ""];');
+    squares[2].onclick();
+    squares[5].onclick();
+    assert.equal(score.textContent, "You: 1 · Computer: 0 · Draws: 0");
+    run("resetGame()");
+    run('board = ["X", "O", "X", "X", "O", "O", "O", "X", ""];');
+    squares[8].onclick();
+    assert.equal(score.textContent, "You: 1 · Computer: 0 · Draws: 1");
 });
