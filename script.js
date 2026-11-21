@@ -20,6 +20,26 @@ const squares = board.map((_, index) => {
     return square;
 });
 
+const arrowMoves = {
+    ArrowUp: [-1, 0],
+    ArrowDown: [1, 0],
+    ArrowLeft: [0, -1],
+    ArrowRight: [0, 1]
+};
+
+boardDiv.addEventListener("keydown", event => {
+    const move = arrowMoves[event.key];
+    const index = squares.indexOf(event.target);
+    if (!Array.isArray(move) || index === -1) return;
+
+    event.preventDefault();
+    const row = Math.floor(index / 3) + move[0];
+    const column = index % 3 + move[1];
+    if (row >= 0 && row < 3 && column >= 0 && column < 3) {
+        squares[row * 3 + column].focus();
+    }
+});
+
 function renderBoard() {
     const suggestion = !hints.checked || gameOver || aiTimer !== null ? -1 : findBestMove(HUMAN);
 
