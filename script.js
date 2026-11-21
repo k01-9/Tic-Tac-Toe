@@ -74,38 +74,31 @@ function isFull() {
 }
 
 // Minimax
-function minimax(isMax) {
+function minimax(isMax, scores) {
+    const key = board.map(cell => cell || "-").join("") + (isMax ? AI : HUMAN);
+    if (scores.has(key)) return scores.get(key);
+
     if (findWinningSquares(AI)) return 10;
     if (findWinningSquares(HUMAN)) return -10;
     if (isFull()) return 0;
 
-    if (isMax) {
-        let best = -Infinity;
-
-        for (let i = 0; i < 9; i++) {
-            if (board[i] === "") {
-                board[i] = AI;
-                best = Math.max(best, minimax(false));
-                board[i] = "";
-            }
-        }
-        return best;
-    } else {
-        let best = Infinity;
-
-        for (let i = 0; i < 9; i++) {
-            if (board[i] === "") {
-                board[i] = HUMAN;
-                best = Math.min(best, minimax(true));
-                board[i] = "";
-            }
-        }
-        return best;
+    const player = isMax ? AI : HUMAN;
+    let best = isMax ? -Infinity : Infinity;
+    for (let index = 0; index < board.length; index++) {
+        if (board[index] !== "") continue;
+        board[index] = player;
+        const score = minimax(!isMax, scores);
+        board[index] = "";
+        best = isMax ? Math.max(best, score) : Math.min(best, score);
     }
+
+    scores.set(key, best);
+    return best;
 }
 
 // Find best move
 function findBestMove(player) {
+    const scores = new Map();
     let bestVal = (player === AI) ? -Infinity : Infinity;
     let move = -1;
 
@@ -113,7 +106,7 @@ function findBestMove(player) {
         if (board[i] === "") {
             board[i] = player;
 
-            let moveVal = minimax(player !== AI);
+            let moveVal = minimax(player !== AI, scores);
 
             board[i] = "";
 
