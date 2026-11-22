@@ -13,7 +13,8 @@
 <div id="board"></div>
 
 <p id="status" role="status"></p>
-<p id="score">You: 0 · Computer: 0 · Draws: 0</p>
+<p id="score" aria-live="polite">You: 0 · Computer: 0 · Draws: 0</p>
+<button id="reset-score" type="button">Reset scores</button>
 
 <button type="button" onclick="resetGame()">Restart</button>
 <label><input id="hints" type="checkbox" checked> Show move hints</label>

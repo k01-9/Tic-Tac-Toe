@@ -130,13 +130,24 @@ function findBestMove(player) {
     return move;
 }
 
+function renderScore() {
+    scoreText.textContent = `You: ${score.human} · Computer: ${score.computer} · Draws: ${score.draws}`;
+}
+
+document.getElementById("reset-score").addEventListener("click", () => {
+    score.human = 0;
+    score.computer = 0;
+    score.draws = 0;
+    renderScore();
+});
+
 function finishRound(result, message, winner) {
     gameOver = true;
     winningSquares = winner
         ? winPatterns.filter(pattern => matchesLine(pattern, winner)).flat()
         : [];
     score[result]++;
-    scoreText.textContent = `You: ${score.human} · Computer: ${score.computer} · Draws: ${score.draws}`;
+    renderScore();
     statusText.innerText = message;
     renderBoard();
 }

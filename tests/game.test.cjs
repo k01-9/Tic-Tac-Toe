@@ -23,7 +23,12 @@ function loadGame() {
         }
     };
     const score = {};
-    const elements = { board, status, hints, score };
+    const resetScore = {
+        addEventListener(type, listener) {
+            this[type] = listener;
+        }
+    };
+    const elements = { board, status, hints, score, "reset-score": resetScore };
     const context = vm.createContext({
         document: {
             getElementById: id => elements[id],
@@ -47,7 +52,7 @@ function loadGame() {
         clearTimeout: timer => timers.delete(timer)
     });
     vm.runInContext(source, context);
-    return { board, squares, status, hints, score, timers, run: code => vm.runInContext(code, context) };
+    return { board, squares, status, hints, score, resetScore, timers, run: code => vm.runInContext(code, context) };
 }
 
 test("a pending AI turn locks the board and restart cancels the move", () => {
@@ -129,4 +134,16 @@ test("the computer prefers an immediate win to a longer winning line", () => {
     run('board = ["X", "", "", "X", "", "X", "O", "O", ""];');
     assert.equal(run("findBestMove(AI)"), 8);
     assert.equal(run('board.join("-")'), "X---X--X-O-O-");
+});
+
+test("resetting scores leaves a pending round intact", () => {
+    const { resetScore, score, squares, timers, run } = loadGame();
+    run('board = ["X", "X", "", "O", "O", "", "", "", ""];');
+    squares[2].onclick();
+    run("resetGame()");
+    squares[0].onclick();
+    resetScore.click();
+    assert.equal(score.textContent, "You: 0 · Computer: 0 · Draws: 0");
+    assert.equal(squares[0].textContent, "X");
+    assert.equal(timers.size, 1);
 });
