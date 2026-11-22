@@ -11,7 +11,22 @@ const boardDiv = document.getElementById("board");
 const statusText = document.getElementById("status");
 const scoreText = document.getElementById("score");
 const hints = document.getElementById("hints");
-hints.addEventListener("change", renderBoard);
+const hintsPreferenceKey = "tic-tac-toe.show-hints";
+
+try {
+    hints.checked = localStorage.getItem(hintsPreferenceKey) !== "false";
+} catch {
+    // The page may be opened where storage is unavailable.
+}
+
+hints.addEventListener("change", () => {
+    try {
+        localStorage.setItem(hintsPreferenceKey, String(hints.checked));
+    } catch {
+        // Keep the toggle usable without storage.
+    }
+    renderBoard();
+});
 
 const squares = board.map((_, index) => {
     const square = document.createElement("button");

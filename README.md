@@ -5,7 +5,7 @@ A browser-based Tic Tac Toe game built with plain HTML, CSS, and JavaScript — 
 
 Open `index.html` in a browser. The game runs offline and has no build step.
 
-You play as **X** and the computer plays as **O**. Select an empty square with a click, or use Tab to focus it and press Enter or Space. Arrow keys move focus between squares. The highlighted square is the suggested move. Clear **Show move hints** to play without suggestions. Select **Restart** to clear the board at any time. The scoreboard counts completed rounds until you reload the page or select **Reset scores**. Resetting scores leaves the current round in progress.
+You play as **X** and the computer plays as **O**. Select an empty square with a click, or use Tab to focus it and press Enter or Space. Arrow keys move focus between squares. The highlighted square is the suggested move. Clear **Show move hints** to play without suggestions. The setting is remembered when browser storage is available. Select **Restart** to clear the board at any time. The scoreboard counts completed rounds until you reload the page or select **Reset scores**. Resetting scores leaves the current round in progress.
 
 ## Run the tests
 

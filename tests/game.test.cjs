@@ -6,7 +6,7 @@ const vm = require("node:vm");
 
 const source = readFileSync(join(__dirname, "../script.js"), "utf8");
 
-function loadGame() {
+function loadGame(localStorage) {
     const squares = [];
     const status = {};
     const timers = new Map();
@@ -30,6 +30,7 @@ function loadGame() {
     };
     const elements = { board, status, hints, score, "reset-score": resetScore };
     const context = vm.createContext({
+        localStorage,
         document: {
             getElementById: id => elements[id],
             createElement() {
@@ -146,4 +147,18 @@ test("resetting scores leaves a pending round intact", () => {
     assert.equal(score.textContent, "You: 0 · Computer: 0 · Draws: 0");
     assert.equal(squares[0].textContent, "X");
     assert.equal(timers.size, 1);
+});
+
+test("the hint preference survives reloading when storage is available", () => {
+    const values = new Map();
+    const storage = {
+        getItem: key => values.get(key) ?? null,
+        setItem: (key, value) => values.set(key, value)
+    };
+    const { hints } = loadGame(storage);
+    hints.checked = false;
+    hints.change();
+    const reopened = loadGame(storage);
+    assert.equal(reopened.hints.checked, false);
+    assert.ok(reopened.squares.every(square => !square.classes.has("suggested")));
 });
