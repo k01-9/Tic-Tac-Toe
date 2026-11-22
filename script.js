@@ -64,8 +64,12 @@ const winPatterns = [
     [0, 4, 8], [2, 4, 6]
 ];
 
-function findWinningSquares(player) {
-    return winPatterns.find(pattern => pattern.every(index => board[index] === player));
+function matchesLine(pattern, player) {
+    return pattern.every(index => board[index] === player);
+}
+
+function hasWon(player) {
+    return winPatterns.some(pattern => matchesLine(pattern, player));
 }
 
 // Check draw
@@ -78,8 +82,8 @@ function minimax(isMax, scores) {
     const key = board.map(cell => cell || "-").join("") + (isMax ? AI : HUMAN);
     if (scores.has(key)) return scores.get(key);
 
-    if (findWinningSquares(AI)) return 10;
-    if (findWinningSquares(HUMAN)) return -10;
+    if (hasWon(AI)) return 10;
+    if (hasWon(HUMAN)) return -10;
     if (isFull()) return 0;
 
     const player = isMax ? AI : HUMAN;
@@ -124,9 +128,11 @@ function findBestMove(player) {
     return move;
 }
 
-function finishRound(result, message, winningLine = []) {
+function finishRound(result, message, winner) {
     gameOver = true;
-    winningSquares = winningLine;
+    winningSquares = winner
+        ? winPatterns.filter(pattern => matchesLine(pattern, winner)).flat()
+        : [];
     score[result]++;
     scoreText.textContent = `You: ${score.human} · Computer: ${score.computer} · Draws: ${score.draws}`;
     statusText.innerText = message;
@@ -139,9 +145,8 @@ function playerMove(index) {
 
     board[index] = HUMAN;
 
-    const humanWin = findWinningSquares(HUMAN);
-    if (humanWin) {
-        finishRound("human", "🎉 You Win!", humanWin);
+    if (hasWon(HUMAN)) {
+        finishRound("human", "🎉 You Win!", HUMAN);
         return;
     }
 
@@ -158,9 +163,8 @@ function playerMove(index) {
         const aiMove = findBestMove(AI);
         board[aiMove] = AI;
 
-        const aiWin = findWinningSquares(AI);
-        if (aiWin) {
-            finishRound("computer", "😢 AI Wins!", aiWin);
+        if (hasWon(AI)) {
+            finishRound("computer", "😢 AI Wins!", AI);
             return;
         }
 

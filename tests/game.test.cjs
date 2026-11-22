@@ -114,3 +114,12 @@ test("a completed round is counted once and survives restart", () => {
     squares[8].onclick();
     assert.equal(score.textContent, "You: 1 · Computer: 0 · Draws: 1");
 });
+
+test("a move that completes two winning lines highlights both", () => {
+    const { score, squares, run } = loadGame();
+    run('board = ["X", "O", "X", "O", "", "O", "X", "O", "X"];');
+    squares[4].onclick();
+    assert.deepEqual(squares.filter(square => square.classes.has("winning")),
+        [squares[0], squares[2], squares[4], squares[6], squares[8]]);
+    assert.equal(score.textContent, "You: 1 · Computer: 0 · Draws: 0");
+});
