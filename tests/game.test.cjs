@@ -123,3 +123,10 @@ test("a move that completes two winning lines highlights both", () => {
         [squares[0], squares[2], squares[4], squares[6], squares[8]]);
     assert.equal(score.textContent, "You: 1 · Computer: 0 · Draws: 0");
 });
+
+test("the computer prefers an immediate win to a longer winning line", () => {
+    const { run } = loadGame();
+    run('board = ["X", "", "", "X", "", "X", "O", "O", ""];');
+    assert.equal(run("findBestMove(AI)"), 8);
+    assert.equal(run('board.join("-")'), "X---X--X-O-O-");
+});

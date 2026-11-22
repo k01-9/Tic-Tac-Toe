@@ -82,8 +82,10 @@ function minimax(isMax, scores) {
     const key = board.map(cell => cell || "-").join("") + (isMax ? AI : HUMAN);
     if (scores.has(key)) return scores.get(key);
 
-    if (hasWon(AI)) return 10;
-    if (hasWon(HUMAN)) return -10;
+    // Empty squares give earlier wins a higher priority without changing the outcome ranking.
+    const winValue = 10 + board.filter(cell => cell === "").length;
+    if (hasWon(AI)) return winValue;
+    if (hasWon(HUMAN)) return -winValue;
     if (isFull()) return 0;
 
     const player = isMax ? AI : HUMAN;
